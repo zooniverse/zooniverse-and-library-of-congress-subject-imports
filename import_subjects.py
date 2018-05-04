@@ -23,44 +23,44 @@ from panoptes_client import Panoptes
 # https://github.com/LibraryOfCongress/data-exploration/blob/master/Accessing%20images%20for%20analysis.ipynb
 # The documentation for https://libraryofcongress.github.io/data-exploration/requests.html#format
 # I thought we could get the segments faster using the item, but can't figure out how to do so for this collection.
-def get_image_urls(url, items=[]):
-    '''
-    Retrieves the image URLs and metadata for items that have public URLs available. 
-    Skips over items that are for the colletion as a whole or web pages about the collection.
-    '''
-    # request pages of 100 results at a time
-    params = {"fo": "json", "c": 100, "at": "results,pagination"}
+def transform_item_segments(url, subjects = []):
+    print("Begin transforming item segements...")
+    params = {"fo": "json"}
     call = requests.get(url, params=params)
     data = call.json()
-    results = data['results']
-    # Selecting the 4th item in the collection.
-    # Can we request the item directly?
-    result = results[4]
-    
-    # don't try to get images from the collection-level result
-    if "collection" not in result.get("original_format") and "web page" not in result.get("original_format"):
-        # take the last URL listed in the image_url array
-        segmentBaseUrl = result['segments'][0]['url']
-        segmentCount = result['segments'][0]['count']
-        
-        for spNum in range(1, segmentCount):
-            subject = {}
-            
-            segmentUrl = segmentBaseUrl + '?sp='+ str(spNum) + '&fo=json'
-            
-            segCall = requests.get(segmentUrl, {"fo": "json"})
-            time.sleep(1)
-            segData = segCall.json()
-            rawSegLocation = segData['segments'][0]['image_url'][-1]
-            segLocation = 'https://' + rawSegLocation[2:-1]
+    # The following data will used as metadata for each panoptes subject
+    cite_this = data['cite_this']['apa']
+    item_date = data['item']['date']
+    loc_id = data['item']['id']
+    source_collection = data['item']['source_collection']
+    item_title = data['item']['title']
 
-            subject['location'] = segLocation
-            subject['metadata'] = {'cite_this': segData['cite_this']['apa'], 'contributor': segData['segments'][0]['contributor'][0], 'date': segData['segments'][0]['date']}
-            
-            items.append(subject)
-            
-    return items
+    # TODO: We want to note that resources should
+    # probably be iterated through? But we are not sure.
+    for resource in data['resources'][0]['files']:
+        subject = {}
+        # From looking at this resource, we know the 5th url
+        # is what we would like to use for the project builder subject
+        # However, we are not sure if this a good approach for all items.
+        url = resource[5]['url']
+        mimetype = resource[5]['mimetype']
+        subject['location'] = url
+        subject['metadata'] = {
+            'APA Citation': cite_this,
+            'Date': item_date,
+            'Library Of Congress Item Id': loc_id,
+            'Source Collection': source_collection,
+            'Title': item_title
+        }
 
-images = get_image_urls('https://www.loc.gov/collections/anna-maria-brodeau-thornton-papers', items = [])
-for image in itemImages:
-    print(image)
+        subjects.append(subject)
+    return subjects
+
+subjects = transform_item_segments('https://www.loc.gov/item/mss5186201')
+
+for subject in subjects:
+    print("")
+    print("PFE SUBJECT:")
+    print(subject)
+    # We want to create and save a new Panoptes subject.
+    # We will have to know the Project ID and the Subject Set ID
