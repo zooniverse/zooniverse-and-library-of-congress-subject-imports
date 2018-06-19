@@ -7,8 +7,8 @@ LIBRARY_OF_CONGRESS_ITEM_ID = 'mss5186201' # item ID, set to 'mss5186201' for de
 
 USERNAME = os.getenv('PANOPTES_USERNAME') # your Zooniverse username, set via environment variable by default, or feel free to hardcode
 PASSWORD = os.getenv('PANOPTES_PASSWORD') # your Zooniverse password, set via environment variable by default, or feel free to hardcode
-ENDPOINT = 'https://panoptes.zooniverse.org' # production = 'https://panoptes.zooniverse.org', staging = 'https://panoptes-staging.zooniverse.org'
 PROJECT = '1234' # your Zooniverse project ID
+ENDPOINT = 'https://panoptes.zooniverse.org' # production = 'https://panoptes.zooniverse.org', staging = 'https://panoptes-staging.zooniverse.org'
 
 def transform_item_segments(url, segments = []):
     print("Begin transforming item segements...")
@@ -37,7 +37,7 @@ def transform_item_segments(url, segments = []):
             segment['location'] = {}
             segment['location'][mimetype] = url
             
-            # DEFINE ZOONIVERSE SUBJECT METADATA
+            # DEFINE ZOONIVERSE SUBJECT METADATA, corresponds to METADATA FROM ITEM above, update both accordingly
             segment['metadata'] = {
                 'APA Citation': apa_citation,
                 'Date': item_date,
@@ -58,11 +58,11 @@ project = Project.find(PROJECT)
 
 subject_set = SubjectSet()
 subject_set.links.project = project
-subject_set.display_name = segments[0]['metadata']['Title']
+subject_set.display_name = segments[0]['metadata']['Title'] # uses item Title as default subject set name, or feel free to hardcode
 subject_set.save()
 
+print('Begin Zooniverse subject upload...')
 for segment in segments:
-    print('Begin Zooniverse subject upload...')
     subject = Subject()
 
     subject.links.project = project
