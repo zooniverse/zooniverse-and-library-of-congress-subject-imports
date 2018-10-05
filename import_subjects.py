@@ -3,11 +3,11 @@ import json
 import os
 from panoptes_client import Panoptes, Project, SubjectSet, Subject
 
-LIBRARY_OF_CONGRESS_ITEM_ID = 'mss5186201' # item ID, set to 'mss5186201' for demonstration purposes, see README
+LIBRARY_OF_CONGRESS_ITEM_ID = os.getenv('LOC_ITEM_ID') # item ID, set via environment variable. Use 'mss5186201' for demonstration purposes, see README
 
-USERNAME = os.getenv('PANOPTES_USERNAME') # your Zooniverse username, set via environment variable by default, or feel free to hardcode
-PASSWORD = os.getenv('PANOPTES_PASSWORD') # your Zooniverse password, set via environment variable by default, or feel free to hardcode
-PROJECT = '1234' # your Zooniverse project ID
+USERNAME = os.getenv('PANOPTES_USERNAME') # your Zooniverse username, set via environment variable
+PASSWORD = os.getenv('PANOPTES_PASSWORD') # your Zooniverse password, set via environment variable
+PROJECT = os.getenv('PANOPTES_PROJECT_ID') # your Zooniverse project ID
 ENDPOINT = 'https://panoptes.zooniverse.org' # production = 'https://panoptes.zooniverse.org', staging = 'https://panoptes-staging.zooniverse.org'
 
 def transform_item_segments(url, segments = []):
@@ -18,7 +18,8 @@ def transform_item_segments(url, segments = []):
 
     FILE_INDEX = 5 # see README
     
-    # BEGIN DEFINE METADATA FROM ITEM, edit/add/delete the following based on your item and desired uses, update DEFINE ZOONIVERSE SUBJECT METADATA below accordingly
+    # BEGIN DEFINE METADATA FROM ITEM, edit/add/delete the following based on your item and desired uses,
+    # update DEFINE ZOONIVERSE SUBJECT METADATA below accordingly
     
     apa_citation = data['cite_this']['apa']
     item_date = data['item']['date']
