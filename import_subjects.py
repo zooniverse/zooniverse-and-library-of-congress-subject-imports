@@ -3,7 +3,7 @@ import json
 import os
 from panoptes_client import Panoptes, Project, SubjectSet, Subject
 
-LIBRARY_OF_CONGRESS_ITEM_ID = os.getenv('LOC_ITEM_ID') # item ID, set via environment variable. Use 'mss5186201' for demonstration purposes, see README
+LOC_ITEM_ID = os.getenv('LOC_ITEM_ID') # item ID, set via environment variable. Use 'mss5186201' for demonstration purposes, see README
 
 USERNAME = os.getenv('PANOPTES_USERNAME') # your Zooniverse username, set via environment variable
 PASSWORD = os.getenv('PANOPTES_PASSWORD') # your Zooniverse password, set via environment variable
@@ -51,7 +51,7 @@ def transform_item_segments(url, segments = []):
     print('Item segments transformation complete.')
     return segments
 
-segments = transform_item_segments('https://www.loc.gov/item/' + LIBRARY_OF_CONGRESS_ITEM_ID)
+segments = transform_item_segments('https://www.loc.gov/item/' + LOC_ITEM_ID)
 
 Panoptes.connect(username=USERNAME, password=PASSWORD, endpoint=ENDPOINT)
 
@@ -61,6 +61,8 @@ subject_set = SubjectSet()
 subject_set.links.project = project
 subject_set.display_name = segments[0]['metadata']['Title'] # uses item Title as default subject set name, or feel free to hardcode
 subject_set.save()
+
+new_subjects = []
 
 print('Begin Zooniverse subject upload...')
 for segment in segments:
@@ -72,6 +74,8 @@ for segment in segments:
     subject.metadata.update(segment['metadata'])
 
     subject.save()
-    subject_set.add(subject)
+    new_subjects.append(subject)
+
+subject_set.add(new_subjects)
 
 print("Zooniverse subject upload complete.")
